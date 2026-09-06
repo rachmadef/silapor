@@ -1,0 +1,615 @@
+=== Page 1 ===
+Sistem Monitoring Pengambilan & Pengumpulan Laptop Siswa
+Halaman 1
+ DOKUMEN PERANCANGAN
+ Sistem Monitoring Pengambilan &
+ Pengumpulan Laptop Siswa
+ Berbasis QR Code dengan Notifikasi WhatsApp kepada Wali Murid
+Komponen
+Teknologi
+Frontend
+Vue 3 + Vite + Tailwind CSS
+Backend
+Laravel 13 + REST API
+Database
+MySQL
+Scanning
+Kamera HP saat testing + scanner 2D USB/HID saat implementasi
+Notifikasi
+WhatsApp Business Platform / Cloud API
+Perubahan alur utama: siswa mengambil laptop pada 07.30–09.00, kemudian mengumpulkan laptop pada
+13.00–15.00. Sistem harus mencatat kedua aktivitas tersebut sehingga dapat memonitor laptop yang sedang dipinjam
+dan memastikan pengembalian pada akhir jadwal.
+Versi rancangan: 2.0  |  03 September 2026
+
+
+=== Page 2 ===
+Sistem Monitoring Pengambilan & Pengumpulan Laptop Siswa
+Halaman 2
+1. Latar Belakang dan Rumusan Masalah
+Latar belakang. Penggunaan laptop sekolah selama kegiatan belajar membutuhkan kontrol pada dua titik penting:
+saat laptop diambil oleh siswa pada pagi hari dan saat laptop dikembalikan pada siang hari. Dengan proses
+manual, petugas harus mencatat siapa yang mengambil laptop, siapa yang telah mengembalikannya, dan siapa
+yang masih membawa laptop setelah batas waktu pengumpulan.
+Sistem ini menggunakan QR Code sebagai identitas cepat siswa. Pada pagi hari, QR siswa dipindai untuk mencatat
+pengambilan laptop. Pada siang hari, QR yang sama dipindai kembali untuk mencatat pengumpulan. Sistem
+kemudian membandingkan daftar siswa yang mengambil dengan daftar siswa yang mengumpulkan. Setelah pukul
+15.00, sistem mencari siswa yang masih berstatus membawa/belum mengumpulkan laptop dan mengirimkan
+notifikasi WhatsApp kepada wali murid.
+Fokus MVP: WhatsApp hanya digunakan untuk kasus yang memerlukan tindakan, yaitu siswa yang sudah tercatat
+mengambil laptop tetapi belum tercatat mengembalikannya setelah batas pengumpulan berakhir.
+Rumusan masalah
+ Bagaimana mencatat pengambilan laptop siswa secara cepat menggunakan QR Code pada 07.30–09.00?
+ 
+ Bagaimana mencatat pengumpulan laptop siswa pada 13.00–15.00 dan menghubungkannya dengan riwayat
+ pengambilan?
+ Bagaimana sistem menentukan siswa yang belum mengembalikan laptop setelah pukul 15.00?
+ 
+ Bagaimana mengirimkan notifikasi WhatsApp otomatis kepada wali murid siswa yang belum mengembalikan laptop?
+ 
+ Bagaimana menyediakan dashboard dan riwayat yang dapat digunakan petugas untuk memonitor status laptop?
+ 
+Tujuan sistem
+ Mencatat pengambilan dan pengumpulan laptop dengan cepat dan terstruktur.
+ 
+ Mengetahui siswa yang sedang memegang laptop berdasarkan transaksi pengambilan.
+ 
+ Memastikan setiap laptop yang diambil memiliki catatan pengembalian.
+ 
+ Mengotomatisasi notifikasi keterlambatan pengembalian.
+ 
+ Menyediakan riwayat transaksi untuk audit dan laporan sekolah.
+ 
+
+=== Page 3 ===
+Sistem Monitoring Pengambilan & Pengumpulan Laptop Siswa
+Halaman 3
+2. Alur Kerja Sistem
+Sistem sekarang memiliki dua sesi transaksi utama: sesi pengambilan dan sesi pengumpulan. QR Code siswa
+dapat digunakan pada kedua sesi. Status akhir ditentukan dari hubungan antara transaksi pengambilan dan
+transaksi pengumpulan.
+Jadwal default yang direkomendasikan
+Sesi
+Waktu
+Tujuan
+Hasil
+Pengambilan laptop
+07.30–09.00
+Mencatat siswa yang mengambil laptop.
+Status: TAKES/DIAMBIL
+Penggunaan
+09.00–13.00
+Laptop digunakan siswa.
+Status: SEDANG
+DIPINJAM
+Pengumpulan laptop
+13.00–15.00
+Mencatat laptop yang dikembalikan.
+Status: SUDAH
+DIKEMBALIKAN
+Pemeriksaan deadline
+Setelah 15.00
+Mencari siswa yang mengambil tetapi belum
+mengembalikan.
+Status:
+TERLAMBAT/BELUM
+DIKEMBALIKAN
+Alur detail
+1
+Petugas membuka sesi pengambilan
+Sistem menyediakan sesi 07.30–09.00 untuk kelas yang ditentukan.
+2
+Siswa mengambil laptop
+QR Code siswa dipindai menggunakan kamera HP atau scanner 2D.
+3
+Sistem mencatat pengambilan
+Backend menyimpan student_id, waktu, petugas, dan identitas laptop jika sistem menggunakan nomor aset laptop.
+4
+Sesi pengambilan ditutup
+Pada pukul 09.00, transaksi pengambilan tidak lagi menerima scan normal untuk sesi tersebut.
+5
+Petugas membuka sesi pengumpulan
+Sistem menyediakan sesi 13.00–15.00.
+6
+Siswa mengembalikan laptop
+QR siswa dipindai kembali. Sistem mencari transaksi pengambilan yang sesuai.
+7
+Sistem memvalidasi pengembalian
+Jika siswa memang memiliki laptop yang sedang dipinjam, status transaksi berubah menjadi dikembalikan.
+8
+Dashboard memonitor progres
+Petugas melihat jumlah diambil, sudah dikembalikan, dan masih belum dikembalikan.
+9
+Pukul 15.00 terlewati
+Scheduler menjalankan pemeriksaan transaksi yang belum memiliki pengembalian.
+10
+WhatsApp dikirim
+Queue mengirim notifikasi hanya kepada wali murid siswa yang masih belum mengembalikan laptop.
+11
+Riwayat disimpan
+Status notifikasi sent/failed dan waktu pengiriman disimpan untuk audit.
+Logika inti status
+
+
+=== Page 4 ===
+Sistem Monitoring Pengambilan & Pengumpulan Laptop Siswa
+Halaman 4
+PAGI (07:30–09:00)
+QR siswa → validasi jadwal → buat loan/pickup record
+                         ↓
+                  status = BORROWED
+SIANG (13:00–15:00)
+QR siswa → cari loan aktif → buat return record
+                         ↓
+                  status = RETURNED
+SETELAH 15:00
+Cari loan aktif tanpa return
+        ↓
+status = OVERDUE / NOT_RETURNED
+        ↓
+buat WhatsApp notification job
+
+
+=== Page 5 ===
+Sistem Monitoring Pengambilan & Pengumpulan Laptop Siswa
+Halaman 5
+3. Struktur Database
+Karena alur berubah menjadi pengambilan dan pengumpulan, database sebaiknya tidak hanya menyimpan tabel
+collection. Diperlukan konsep transaksi peminjaman/pengambilan yang dapat dipasangkan dengan transaksi
+pengembalian.
+Tabel
+Fungsi
+Kolom kunci / penting
+users
+Akun admin/petugas.
+id, name, email, password, role, is_active
+classes
+Master kelas.
+id, name, grade, academic_year, is_active
+parents
+Wali murid penerima WhatsApp.
+id, name, whatsapp_number, is_active
+students
+Master siswa.
+id, nis, name, class_id, parent_id, is_active
+laptops
+Master aset laptop sekolah.
+id, asset_code, serial_number, status, is_active
+qr_codes
+Token QR unik siswa.
+id, student_id, token, is_active
+schedules
+Jadwal sesi pengambilan/pengumpulan.
+id, class_id, type, start_at, end_at, status, created_by
+laptop_loans
+Transaksi siswa mengambil laptop.
+id, schedule_id, student_id, laptop_id, taken_by, taken_at,
+status
+laptop_returns
+Transaksi pengembalian laptop.
+id, loan_id, returned_by, returned_at, condition, notes
+notifications
+Riwayat WhatsApp.
+id, student_id, parent_id, loan_id, type, status, sent_at,
+error_message
+Relasi utama
+classes 1 ■■■■■ N students
+parents 1 ■■■■■ N students
+students 1 ■■■■■ 1 qr_codes
+classes 1 ■■■■■ N schedules
+schedules 1 ■■■ N laptop_loans
+students 1 ■■■■■ N laptop_loans
+laptops 1 ■■■■■■ N laptop_loans
+laptop_loans 1 ■ 0..1 laptop_returns
+users 1 ■■■■■■■■ N schedules
+users 1 ■■■■■■■■ N laptop_loans
+users 1 ■■■■■■■■ N laptop_returns
+laptop_loans 1 ■ N notifications
+parents 1 ■■■■■ N notifications
+Catatan desain penting
+ Jika satu siswa selalu menggunakan laptop yang sama, laptop_id tetap berguna untuk pencatatan aset dan audit.
+ 
+ Jika sekolah tidak membutuhkan pelacakan nomor aset laptop, tabel laptops dapat disederhanakan atau dihilangkan
+ pada MVP.
+ Hubungan loan → return sebaiknya 1:0..1 untuk satu sesi harian: satu pengambilan memiliki nol atau satu
+ pengembalian sukses.
+ Notifikasi dihubungkan ke transaksi loan agar jelas alasan pesan dikirim: ada laptop yang diambil tetapi belum
+ dikembalikan.
+
+
+=== Page 6 ===
+Sistem Monitoring Pengambilan & Pengumpulan Laptop Siswa
+Halaman 6
+4. Framework Backend dan Frontend
+Backend
+Teknologi
+Peran
+Alasan
+Laravel 13
+REST API, autentikasi, business logic,
+scheduler, queue.
+Cocok untuk sistem informasi dan integrasi API.
+PHP 8.3+
+Bahasa backend.
+Baseline kompatibel untuk Laravel 13.
+MySQL
+Database relasional.
+Cocok untuk transaksi siswa, laptop, jadwal, dan
+notifikasi.
+Laravel Sanctum
+Authentication SPA/API.
+Sederhana untuk komunikasi Vue ↔ Laravel.
+Frontend
+Teknologi
+Peran
+Alasan
+Vue 3
+Framework UI.
+Cepat dikembangkan untuk dashboard, form, scanner,
+dan monitoring.
+Vite
+Build tool.
+Development dan build frontend cepat.
+Tailwind CSS
+Styling.
+Mempercepat pembuatan UI responsif.
+Vue Router
+Routing.
+Mengatur halaman login, dashboard, jadwal, scanner,
+dan laporan.
+Pinia
+State management.
+Menyimpan state auth dan sesi scanner.
+Arsitektur
+Vue 3 + Tailwind
+      ■
+      ■ REST API / JSON
+      ▼
+Laravel 13
+ ■■■ Authentication (Sanctum)
+ ■■■ Schedule Management
+ ■■■ QR Validation
+ ■■■ Loan / Pickup Logic
+ ■■■ Return Logic
+ ■■■ Scheduler
+ ■■■ Queue
+ ■■■ WhatsApp Integration
+      ■
+      ■■■■■■■■■ MySQL
+      ■■■■■■■■■ WhatsApp Business API
+
+
+=== Page 7 ===
+Sistem Monitoring Pengambilan & Pengumpulan Laptop Siswa
+Halaman 7
+5. Daftar Library dan Plugin yang Dibutuhkan
+Backend
+Package/komponen
+Kegunaan
+Prioritas
+laravel/framework
+Framework backend.
+Wajib
+laravel/sanctum
+Authentication SPA/API.
+Wajib
+endroid/qr-code
+Generate QR Code siswa.
+Wajib
+Laravel HTTP Client
+Request HTTPS ke WhatsApp API.
+Wajib / built-in
+Laravel Scheduler
+Pemeriksaan transaksi setelah 15.00.
+Wajib / built-in
+Laravel Queue
+Pengiriman WhatsApp background job.
+Wajib / built-in
+Frontend
+Package/komponen
+Kegunaan
+Prioritas
+vue
+Framework frontend.
+Wajib
+vue-router
+Routing SPA.
+Wajib
+pinia
+State management.
+Direkomendasika
+n
+axios
+HTTP client ke Laravel API.
+Direkomendasika
+n
+html5-qrcode
+Scan QR melalui kamera HP.
+Wajib untuk
+testing/mobile
+tailwindcss
+Styling UI.
+Direkomendasika
+n
+Testing dan development
+Tool
+Kegunaan
+Pest / PHPUnit
+Unit test dan feature test backend.
+Laravel Pint
+Formatting kode PHP.
+ESLint + Prettier
+Kualitas dan formatting JavaScript/Vue.
+Postman
+Pengujian endpoint API.
+Figma
+UI/UX design.
+Git + GitHub
+Kolaborasi dan version control.
+Perangkat implementasi
+ Testing: smartphone dengan browser dan kamera.
+ 
+ Implementasi: PC/laptop petugas + scanner QR 2D USB/HID.
+ 
+ Koneksi internet diperlukan untuk komunikasi dengan WhatsApp API.
+ 
+ Server dapat ditempatkan pada jaringan sekolah/cloud sesuai kebutuhan deployment.
+ 
+
+=== Page 8 ===
+Sistem Monitoring Pengambilan & Pengumpulan Laptop Siswa
+Halaman 8
+6. Struktur Folder Final secara Detail dan Jelas
+Struktur berikut menyesuaikan alur dua transaksi: pickup/pengambilan dan return/pengumpulan. Backend dan
+frontend dipisahkan agar pembagian kerja tim jelas.
+project-monitoring-laptop/
+■■■ backend/                              # Laravel 13
+■   ■■■ app/
+■   ■   ■■■ Console/
+■   ■   ■   ■■■ Commands/
+■   ■   ■       ■■■ CheckOverdueLaptops.php
+■   ■   ■■■ Http/
+■   ■   ■   ■■■ Controllers/
+■   ■   ■   ■   ■■■ AuthController.php
+■   ■   ■   ■   ■■■ DashboardController.php
+■   ■   ■   ■   ■■■ StudentController.php
+■   ■   ■   ■   ■■■ ClassController.php
+■   ■   ■   ■   ■■■ ParentController.php
+■   ■   ■   ■   ■■■ LaptopController.php
+■   ■   ■   ■   ■■■ ScheduleController.php
+■   ■   ■   ■   ■■■ PickupController.php
+■   ■   ■   ■   ■■■ ReturnController.php
+■   ■   ■   ■   ■■■ NotificationController.php
+■   ■   ■   ■■■ Requests/
+■   ■   ■   ■   ■■■ LoginRequest.php
+■   ■   ■   ■   ■■■ StudentRequest.php
+■   ■   ■   ■   ■■■ ScheduleRequest.php
+■   ■   ■   ■   ■■■ PickupScanRequest.php
+■   ■   ■   ■   ■■■ ReturnScanRequest.php
+■   ■   ■   ■■■ Resources/
+■   ■   ■       ■■■ StudentResource.php
+■   ■   ■       ■■■ LaptopResource.php
+■   ■   ■       ■■■ ScheduleResource.php
+■   ■   ■       ■■■ LoanResource.php
+■   ■   ■■■ Jobs/
+■   ■   ■   ■■■ SendWhatsAppNotification.php
+■   ■   ■■■ Models/
+■   ■   ■   ■■■ User.php
+■   ■   ■   ■■■ ClassRoom.php
+■   ■   ■   ■■■ ParentModel.php
+■   ■   ■   ■■■ Student.php
+■   ■   ■   ■■■ Laptop.php
+■   ■   ■   ■■■ QrCode.php
+■   ■   ■   ■■■ Schedule.php
+■   ■   ■   ■■■ LaptopLoan.php
+■   ■   ■   ■■■ LaptopReturn.php
+■   ■   ■   ■■■ Notification.php
+■   ■   ■■■ Services/
+■   ■   ■   ■■■ QrCodeService.php
+■   ■   ■   ■■■ PickupService.php
+■   ■   ■   ■■■ ReturnService.php
+■   ■   ■   ■■■ WhatsAppService.php
+■   ■   ■■■ Policies/
+■   ■■■ database/
+■   ■   ■■■ factories/
+■   ■   ■■■ migrations/
+■   ■   ■■■ seeders/
+■   ■■■ routes/
+■   ■   ■■■ api.php
+■   ■   ■■■ console.php
+■   ■■■ tests/
+■   ■   ■■■ Feature/
+■   ■   ■   ■■■ PickupTest.php
+■   ■   ■   ■■■ ReturnTest.php
+■   ■   ■   ■■■ NotificationTest.php
+■   ■   ■■■ Unit/
+■   ■■■ config/
+■   ■■■ storage/
+■   ■■■ .env
+■   ■■■ composer.json
+■   ■■■ artisan
+■
+■■■ frontend/                             # Vue 3 + Vite
+■   ■■■ src/
+
+
+=== Page 9 ===
+Sistem Monitoring Pengambilan & Pengumpulan Laptop Siswa
+Halaman 9
+■   ■   ■■■ assets/
+■   ■   ■■■ components/
+■   ■   ■   ■■■ layout/
+■   ■   ■   ■   ■■■ AppSidebar.vue
+■   ■   ■   ■   ■■■ AppNavbar.vue
+■   ■   ■   ■   ■■■ AppBreadcrumb.vue
+■   ■   ■   ■■■ common/
+■   ■   ■   ■   ■■■ DataTable.vue
+■   ■   ■   ■   ■■■ ConfirmDialog.vue
+■   ■   ■   ■   ■■■ StatusBadge.vue
+■   ■   ■   ■   ■■■ LoadingSpinner.vue
+■   ■   ■   ■■■ scanner/
+■   ■   ■   ■   ■■■ CameraScanner.vue
+■   ■   ■   ■   ■■■ ScannerInput.vue
+■   ■   ■   ■   ■■■ ScannerResult.vue
+■   ■   ■   ■■■ dashboard/
+■   ■   ■       ■■■ SummaryCard.vue
+■   ■   ■       ■■■ PickupProgress.vue
+■   ■   ■       ■■■ ReturnProgress.vue
+■   ■   ■       ■■■ OverdueList.vue
+■   ■   ■■■ views/
+■   ■   ■   ■■■ auth/LoginView.vue
+■   ■   ■   ■■■ DashboardView.vue
+■   ■   ■   ■■■ students/StudentListView.vue
+■   ■   ■   ■■■ classes/ClassListView.vue
+■   ■   ■   ■■■ parents/ParentListView.vue
+■   ■   ■   ■■■ laptops/LaptopListView.vue
+■   ■   ■   ■■■ schedules/ScheduleListView.vue
+■   ■   ■   ■■■ schedules/ScheduleFormView.vue
+■   ■   ■   ■■■ pickup/PickupScannerView.vue
+■   ■   ■   ■■■ return/ReturnScannerView.vue
+■   ■   ■   ■■■ monitoring/MonitoringView.vue
+■   ■   ■   ■■■ notifications/NotificationLogView.vue
+■   ■   ■   ■■■ reports/ReportView.vue
+■   ■   ■■■ stores/
+■   ■   ■   ■■■ auth.js
+■   ■   ■   ■■■ schedules.js
+■   ■   ■   ■■■ pickup.js
+■   ■   ■   ■■■ returns.js
+■   ■   ■   ■■■ monitoring.js
+■   ■   ■■■ services/
+■   ■   ■   ■■■ api.js
+■   ■   ■   ■■■ authService.js
+■   ■   ■   ■■■ studentService.js
+■   ■   ■   ■■■ laptopService.js
+■   ■   ■   ■■■ scheduleService.js
+■   ■   ■   ■■■ pickupService.js
+■   ■   ■   ■■■ returnService.js
+■   ■   ■   ■■■ reportService.js
+■   ■   ■■■ router/index.js
+■   ■   ■■■ App.vue
+■   ■   ■■■ main.js
+■   ■■■ public/
+■   ■■■ package.json
+■   ■■■ vite.config.js
+■
+■■■ docs/
+■   ■■■ ERD/
+■   ■■■ API/
+■   ■■■ UI-UX/
+■   ■■■ SOP/
+■   ■■■ testing/
+■■■ README.md
+■■■ .gitignore
+Pembagian fungsi folder penting
+Folder
+Tanggung jawab
+PickupController / PickupService
+Validasi dan pencatatan pengambilan laptop 07.30–09.00.
+ReturnController / ReturnService
+Validasi dan pencatatan pengumpulan laptop 13.00–15.00.
+CheckOverdueLaptops.php
+Mencari transaksi pengambilan yang belum memiliki pengembalian setelah 15.00.
+
+
+=== Page 10 ===
+Sistem Monitoring Pengambilan & Pengumpulan Laptop Siswa
+Halaman 10
+Folder
+Tanggung jawab
+SendWhatsAppNotification.php
+Job queue untuk mengirim notifikasi kepada wali murid.
+LaptopLoan model
+Mewakili transaksi laptop diambil/dipinjam.
+LaptopReturn model
+Mewakili transaksi laptop dikembalikan.
+PickupScannerView.vue
+Antarmuka scan pada sesi pagi.
+ReturnScannerView.vue
+Antarmuka scan pada sesi siang.
+MonitoringView.vue
+Menampilkan status diambil, dikembalikan, dan terlambat.
+
+
+=== Page 11 ===
+Sistem Monitoring Pengambilan & Pengumpulan Laptop Siswa
+Halaman 11
+7. Aturan Bisnis dan Prioritas MVP
+Aturan bisnis yang disarankan
+ 07.30–09.00: hanya transaksi pengambilan yang dapat dilakukan.
+ 
+ 13.00–15.00: hanya transaksi pengumpulan yang dapat dilakukan.
+ 
+ Siswa tidak dapat tercatat sebagai mengembalikan laptop jika tidak memiliki transaksi pengambilan aktif.
+ 
+ Satu transaksi pengambilan hanya memiliki satu pengembalian sukses.
+ 
+ Jika QR siswa dipindai dua kali pada sesi yang sama, sistem harus memberi peringatan duplikasi.
+ 
+ Setelah pukul 15.00, sistem mengidentifikasi semua siswa yang mengambil laptop tetapi belum mengembalikannya.
+ 
+ Notifikasi WhatsApp hanya dikirim untuk status OVERDUE/NOT_RETURNED.
+ 
+ Status pengiriman notifikasi harus dicatat agar pesan tidak dikirim berulang tanpa alasan.
+ 
+Dashboard yang disarankan
+Indikator
+Contoh
+Total siswa mengambil
+32
+Sudah mengambil
+32
+Sudah mengembalikan
+29
+Belum mengembalikan
+3
+Persentase pengembalian
+90,6%
+Notifikasi WhatsApp
+3 queued/sent
+Prioritas MVP
+Wajib: login → data siswa/wali → QR → jadwal → scan pengambilan → scan pengumpulan → monitoring → scheduler
+setelah 15.00 → WhatsApp untuk yang belum mengembalikan → riwayat.
+Fitur lanjutan: pelacakan nomor aset/serial laptop, kondisi laptop saat dikembalikan, foto kondisi, export Excel/PDF,
+statistik bulanan, chatbot WhatsApp, dan notifikasi pengingat sebelum 15.00.
+
+
+=== Page 12 ===
+Sistem Monitoring Pengambilan & Pengumpulan Laptop Siswa
+Halaman 12
+8. Catatan Implementasi Perangkat
+Mode testing
+Tim dapat mengembangkan dan menguji sistem hanya menggunakan HP. Halaman scanner menggunakan kamera
+browser dan library html5-qrcode. Sisi backend tetap menerima token QR yang sama.
+Mode penerapan sekolah
+Untuk penggunaan operasional, scanner QR 2D USB/HID dapat dihubungkan ke komputer petugas. Scanner
+tersebut pada umumnya memasukkan hasil scan seperti keyboard. Dengan demikian frontend cukup menyediakan
+input scanner, sedangkan endpoint Laravel, database, dan business logic tetap sama.
+TESTING:
+HP Camera → CameraScanner.vue → POST /api/pickups/scan
+                              → POST /api/returns/scan
+IMPLEMENTASI:
+USB 2D Scanner → ScannerInput.vue → endpoint API yang sama
+Kesimpulan perubahan desain
+Perubahan dari satu sesi pengumpulan menjadi dua sesi membuat sistem lebih kuat: bukan hanya mengetahui siapa
+yang mengumpulkan laptop, tetapi juga mengetahui siapa yang mengambil laptop dan apakah laptop tersebut
+sudah dikembalikan. Karena itu, struktur database dan folder backend perlu memakai konsep loan/pickup dan
+return. Framework utama tetap sama: Vue 3 di frontend dan Laravel 13 di backend.
+
+
+=== Page 13 ===
+Sistem Monitoring Pengambilan & Pengumpulan Laptop Siswa
+Halaman 13
+9. Referensi Teknis
+Baseline teknologi pada dokumen ini: Laravel 13, Vue 3, Vite, Tailwind CSS, MySQL, html5-qrcode, dan WhatsApp
+Business Platform/Cloud API. Versi dependency sebaiknya dikunci menggunakan composer.lock dan
+package-lock/pnpm-lock sebelum development tim dimulai.
+Referensi resmi yang disarankan untuk implementasi:
+Laravel Documentation — https://laravel.com/docs
+Vue Documentation — https://vuejs.org/guide/introduction.html
+Vite Documentation — https://vite.dev/guide/
+Tailwind CSS Documentation — https://tailwindcss.com/docs
+WhatsApp Business Platform — https://developers.facebook.com/docs/whatsapp/
+Catatan: detail endpoint dan kebijakan WhatsApp dapat berubah. Tim harus memeriksa dokumentasi provider/API yang
+benar-benar digunakan sebelum integrasi production.
+
+
