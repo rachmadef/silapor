@@ -51,7 +51,7 @@ class PickupService
                 ->latest()
                 ->first();
 
-            // Find laptop if asset code provided
+            // Find laptop if asset code provided, or auto-select student's registered laptop
             $laptop = null;
             if ($laptopAssetCode) {
                 $laptop = Laptop::where('asset_code', $laptopAssetCode)->first();
@@ -62,6 +62,11 @@ class PickupService
                     throw new Exception("Laptop '{$laptopAssetCode}' sedang dipinjam oleh siswa lain.");
                 }
                 $laptop->update(['status' => 'borrowed']);
+            } else {
+                $laptop = Laptop::where('student_id', $student->id)->where('is_active', true)->first();
+                if ($laptop) {
+                    $laptop->update(['status' => 'borrowed']);
+                }
             }
 
             // Create loan record

@@ -10,7 +10,10 @@ return new class extends Migration
     {
         Schema::create('laptops', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('student_id')->nullable()->constrained('students')->nullOnDelete();
             $table->string('asset_code')->unique();
+            $table->string('brand')->nullable();
+            $table->string('model')->nullable();
             $table->string('serial_number')->nullable();
             $table->string('status')->default('available'); // available, borrowed, maintenance
             $table->boolean('is_active')->default(true);

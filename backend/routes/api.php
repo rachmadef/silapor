@@ -14,6 +14,8 @@ use Illuminate\Support\Facades\Route;
 
 // Public routes
 Route::post('/auth/login', [AuthController::class, 'login']);
+Route::get('/public/students', [LaptopController::class, 'publicStudents']);
+Route::post('/public/laptop-form', [LaptopController::class, 'submitStudentForm']);
 
 // Protected routes
 Route::middleware('auth:sanctum')->group(function () {

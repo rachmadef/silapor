@@ -1,88 +1,98 @@
 <template>
   <div class="space-y-6">
     <!-- Header Banner -->
-    <div class="bg-gradient-to-r from-emerald-50 via-slate-50 to-teal-50 border border-emerald-100 rounded-2xl p-6 shadow-sm">
-      <div class="flex items-center space-x-3">
-        <div class="p-3 bg-emerald-600 text-white rounded-xl shadow-md shadow-emerald-600/20">
-          <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <div class="bg-white border border-stone-200/90 rounded-3xl p-6 sm:p-7 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div class="flex items-center space-x-4">
+        <div class="w-12 h-12 rounded-2xl bg-emerald-700 text-white flex items-center justify-center shrink-0 shadow-sm shadow-emerald-900/15">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
           </svg>
         </div>
         <div>
-          <h2 class="text-xl font-bold text-slate-900">Sesi Scan Pengembalian Laptop (Siang 13.00 - 15.00)</h2>
-          <p class="text-xs text-emerald-700 font-medium">Pindai QR Code siswa untuk mencatat pengembalian laptop di siang hari</p>
+          <span class="text-[11px] font-bold uppercase tracking-wider text-emerald-700">Sesi Siang • 13.00 – 15.00 WIB</span>
+          <h2 class="text-xl sm:text-2xl font-extrabold text-stone-900 tracking-tight">Scan Pengembalian Laptop</h2>
+          <p class="text-xs sm:text-sm text-stone-500 mt-0.5">Pindai kembali QR Code siswa untuk memverifikasi pengembalian laptop</p>
         </div>
       </div>
     </div>
 
     <!-- Scan Alert Result Banner -->
-    <div v-if="lastResult" :class="[
-      'p-4 rounded-2xl border transition-all duration-300 flex items-start space-x-4 shadow-sm',
-      lastResult.success ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : 'bg-rose-50 border-rose-200 text-rose-800'
-    ]">
-      <div class="p-2 rounded-xl" :class="lastResult.success ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'">
-        <svg v-if="lastResult.success" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-        </svg>
-        <svg v-else class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-        </svg>
-      </div>
-      <div class="flex-1">
-        <h4 class="font-bold text-base">{{ lastResult.success ? 'PENGEMBALIAN BERHASIL DICATAT!' : 'PERINGATAN SCAN GAGAL' }}</h4>
-        <p class="text-sm mt-0.5 font-medium">{{ lastResult.message }}</p>
-        <div v-if="lastResult.data" class="mt-2 pt-2 border-t border-emerald-200 grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
-          <div><span class="text-emerald-700 font-semibold">Kondisi:</span> {{ lastResult.data.condition }}</div>
-          <div><span class="text-emerald-700 font-semibold">Waktu:</span> {{ formatDate(lastResult.data.returned_at) }}</div>
+    <Transition name="fade-slide" mode="out-in">
+      <div
+        v-if="lastResult"
+        :key="lastResult.message"
+        :class="[
+          'p-5 rounded-3xl border transition-all duration-300 flex items-start space-x-4 shadow-xs',
+          lastResult.success ? 'bg-emerald-50/90 border-emerald-200 text-emerald-900' : 'bg-rose-50/90 border-rose-200 text-rose-900'
+        ]"
+      >
+        <div class="p-2.5 rounded-2xl shrink-0" :class="lastResult.success ? 'bg-emerald-600 text-white' : 'bg-rose-600 text-white'">
+          <svg v-if="lastResult.success" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+          </svg>
+          <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
+          </svg>
         </div>
+        <div class="flex-1 min-w-0">
+          <h4 class="font-extrabold text-sm">{{ lastResult.success ? 'Pengembalian Berhasil Dicatat' : 'Peringatan Scan' }}</h4>
+          <p class="text-xs mt-0.5 font-medium">{{ lastResult.message }}</p>
+          <div v-if="lastResult.data" class="mt-3 pt-2.5 border-t border-emerald-200/80 grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
+            <div><span class="text-emerald-700 font-semibold">Kondisi:</span> {{ lastResult.data.condition }}</div>
+            <div><span class="text-emerald-700 font-semibold">Waktu:</span> {{ formatDate(lastResult.data.returned_at) }}</div>
+          </div>
+        </div>
+        <button @click="lastResult = null" class="p-1 text-stone-400 hover:text-stone-700 rounded-lg cursor-pointer">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
       </div>
-    </div>
+    </Transition>
 
     <!-- Scanner Controls Grid -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <!-- Left: USB Input Scanner -->
-      <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
-        <div class="flex items-center space-x-2">
-          <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-          </svg>
-          <h3 class="text-base font-bold text-slate-900">Scanner USB / Input Manual Token QR</h3>
+      <div class="bg-white border border-stone-200/90 rounded-3xl p-6 sm:p-7 shadow-2xs space-y-5">
+        <div>
+          <h3 class="text-base font-extrabold text-stone-900">Scanner USB / Input Token & NIS</h3>
+          <p class="text-xs text-stone-500 mt-0.5">Pindai QR siswa dan catat kondisi fisik laptop saat dikembalikan</p>
         </div>
 
         <form @submit.prevent="submitScan" class="space-y-4">
           <div>
-            <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Token QR Siswa / NIS</label>
+            <label class="block text-xs font-bold text-stone-700 mb-2">Token QR Siswa atau NIS</label>
             <input
               ref="qrInputRef"
               v-model="qrTokenInput"
               type="text"
               required
-              placeholder="Arahkan scanner USB ke sini (e.g. STU-XXXXXXXX)"
-              class="w-full bg-slate-50 border-2 border-emerald-200 rounded-xl px-4 py-3.5 text-slate-900 font-mono text-base focus:outline-none focus:border-emerald-600 focus:bg-white focus:ring-2 focus:ring-emerald-100 transition-all"
+              placeholder="Arahkan scanner atau ketik NIS..."
+              class="w-full bg-[#FAF8F5] border-2 border-stone-200 rounded-2xl px-4 py-3.5 text-stone-900 font-mono text-sm focus:outline-none focus:border-emerald-700 focus:bg-white transition-all"
               autofocus
             />
           </div>
 
-          <div class="grid grid-cols-2 gap-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Kondisi Laptop</label>
+              <label class="block text-xs font-bold text-stone-700 mb-2">Kondisi Perangkat</label>
               <select
                 v-model="conditionInput"
-                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-slate-900 text-sm focus:outline-none focus:border-emerald-600 focus:bg-white focus:ring-2 focus:ring-emerald-100 transition-all font-medium"
+                class="w-full bg-[#FAF8F5] border border-stone-200 rounded-2xl px-3.5 py-3 text-stone-900 text-xs focus:outline-none focus:border-emerald-700 focus:bg-white transition-all font-semibold cursor-pointer"
               >
-                <option value="good">Baik (Normal)</option>
-                <option value="damaged">Rusak / Bermasalah</option>
+                <option value="good">Baik / Normal</option>
+                <option value="damaged">Ada Kendala / Rusak</option>
                 <option value="lost">Hilang</option>
               </select>
             </div>
 
             <div>
-              <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Catatan (Opsional)</label>
+              <label class="block text-xs font-bold text-stone-700 mb-2">Catatan (Opsional)</label>
               <input
                 v-model="notesInput"
                 type="text"
-                placeholder="e.g. Charger tertinggal"
-                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-slate-900 text-sm focus:outline-none focus:border-emerald-600 focus:bg-white focus:ring-2 focus:ring-emerald-100 transition-all"
+                placeholder="Misal: Charger tertinggal..."
+                class="w-full bg-[#FAF8F5] border border-stone-200 rounded-2xl px-3.5 py-3 text-stone-900 text-xs focus:outline-none focus:border-emerald-700 focus:bg-white transition-all"
               />
             </div>
           </div>
@@ -90,9 +100,9 @@
           <button
             type="submit"
             :disabled="loading"
-            class="w-full py-3.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-md shadow-emerald-600/20 transition-all disabled:opacity-50"
+            class="w-full py-3.5 px-4 rounded-2xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-sm shadow-sm shadow-emerald-900/15 transition-all disabled:opacity-50 cursor-pointer"
           >
-            {{ loading ? 'Memproses Pengembalian...' : 'Proses Scan Pengembalian' }}
+            {{ loading ? 'Memproses...' : 'Catat Pengembalian Laptop' }}
           </button>
         </form>
       </div>
@@ -102,43 +112,59 @@
     </div>
 
     <!-- Today's Return History Table -->
-    <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
+    <div class="bg-white border border-stone-200/90 rounded-3xl p-6 sm:p-7 shadow-2xs space-y-4">
       <div class="flex items-center justify-between">
-        <h3 class="text-base font-bold text-slate-900">Riwayat Pengembalian Hari Ini</h3>
-        <span class="text-xs text-slate-500 font-mono font-medium">{{ returns.length }} Transaksi</span>
+        <div>
+          <h3 class="text-base font-extrabold text-stone-900">Riwayat Pengembalian Siang Ini</h3>
+          <p class="text-xs text-stone-500">Daftar siswa yang telah mengembalikan laptop hari ini</p>
+        </div>
+        <span class="px-3.5 py-1.5 rounded-full bg-[#FAF8F5] border border-stone-200 text-xs text-stone-700 font-mono font-bold">
+          {{ returns.length }} Siswa
+        </span>
       </div>
 
       <div class="overflow-x-auto">
-        <table class="w-full text-left text-sm text-slate-700">
-          <thead class="bg-slate-50 text-xs font-bold text-slate-500 uppercase border-b border-slate-200">
+        <table class="w-full text-left text-sm text-stone-700">
+          <thead class="bg-[#FAF8F5] text-[11px] font-bold text-stone-500 uppercase tracking-wider border-y border-stone-200/80">
             <tr>
-              <th class="px-4 py-3">NIS</th>
-              <th class="px-4 py-3">Nama Siswa</th>
-              <th class="px-4 py-3">Kelas</th>
-              <th class="px-4 py-3">Waktu Kembalikan</th>
-              <th class="px-4 py-3">Kondisi</th>
-              <th class="px-4 py-3">Catatan</th>
-              <th class="px-4 py-3">Petugas</th>
+              <th class="px-4 py-3.5">Peserta Didik</th>
+              <th class="px-4 py-3.5">Kelas</th>
+              <th class="px-4 py-3.5">Waktu Kembali</th>
+              <th class="px-4 py-3.5">Kondisi</th>
+              <th class="px-4 py-3.5">Catatan</th>
+              <th class="px-4 py-3.5">Petugas</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-slate-100">
+          <tbody class="divide-y divide-stone-100">
             <tr v-if="returns.length === 0">
-              <td colspan="7" class="px-4 py-8 text-center text-slate-400 text-xs font-medium">
-                Belum ada transaksi pengembalian laptop hari ini.
+              <td colspan="6" class="px-4 py-10 text-center text-stone-400 text-xs font-medium">
+                Belum ada transaksi pengembalian laptop yang tercatat siang ini.
               </td>
             </tr>
-            <tr v-for="ret in returns" :key="ret.id" class="hover:bg-slate-50/80 transition-colors">
-              <td class="px-4 py-3 font-mono text-indigo-600 font-semibold text-xs">{{ ret.loan?.student?.nis }}</td>
-              <td class="px-4 py-3 font-bold text-slate-900">{{ ret.loan?.student?.name }}</td>
-              <td class="px-4 py-3 text-slate-600">{{ ret.loan?.student?.class_name }}</td>
-              <td class="px-4 py-3 text-xs text-slate-500 font-medium">{{ formatDate(ret.returned_at) }}</td>
-              <td class="px-4 py-3">
-                <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase" :class="ret.condition === 'good' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'">
-                  {{ ret.condition }}
+            <tr v-for="ret in returns" :key="ret.id" class="hover:bg-[#FAF8F5]/80 transition-colors">
+              <td class="px-4 py-3.5">
+                <div class="flex items-center space-x-3">
+                  <div class="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200/60 font-bold text-xs flex items-center justify-center shrink-0">
+                    {{ ret.loan?.student?.name?.charAt(0) || 'S' }}
+                  </div>
+                  <div>
+                    <p class="font-bold text-stone-900">{{ ret.loan?.student?.name }}</p>
+                    <p class="text-xs font-mono text-stone-500">NIS: {{ ret.loan?.student?.nis }}</p>
+                  </div>
+                </div>
+              </td>
+              <td class="px-4 py-3.5 text-stone-600 text-xs font-semibold">{{ ret.loan?.student?.class_name }}</td>
+              <td class="px-4 py-3.5 text-xs text-stone-600 font-mono">{{ formatDate(ret.returned_at) }}</td>
+              <td class="px-4 py-3.5">
+                <span
+                  class="px-2.5 py-1 rounded-full text-[11px] font-bold"
+                  :class="ret.condition === 'good' ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-rose-50 text-rose-800 border border-rose-200'"
+                >
+                  {{ ret.condition === 'good' ? 'Baik' : ret.condition }}
                 </span>
               </td>
-              <td class="px-4 py-3 text-xs text-slate-500 font-medium">{{ ret.notes || '-' }}</td>
-              <td class="px-4 py-3 text-xs text-slate-500 font-medium">{{ ret.officer?.name || '-' }}</td>
+              <td class="px-4 py-3.5 text-xs text-stone-500 font-medium">{{ ret.notes || '-' }}</td>
+              <td class="px-4 py-3.5 text-xs text-stone-500 font-medium">{{ ret.officer?.name || '-' }}</td>
             </tr>
           </tbody>
         </table>
@@ -173,7 +199,7 @@ const submitScan = async () => {
 
   const now = Date.now()
   if (token === lastSubmittedToken && now - lastSubmittedTime < 2500) {
-    return // Avoid duplicate submit within 2.5 seconds
+    return
   }
   lastSubmittedToken = token
   lastSubmittedTime = now

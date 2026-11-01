@@ -63,15 +63,7 @@ class DatabaseSeeder extends Seeder
             $qrCodeService->generateForStudent($student);
         }
 
-        // 5. Create Laptops
-        for ($i = 1; $i <= 10; $i++) {
-            Laptop::create([
-                'asset_code' => sprintf('LAP-%03d', $i),
-                'serial_number' => 'SN-LENOVO-' . (1000 + $i),
-                'status' => 'available',
-                'is_active' => true,
-            ]);
-        }
+        // 5. Data Aset Laptop dikosongkan (diisi melalui form khusus peserta didik)
 
         // 6. Create Daily Schedules
         Schedule::create([

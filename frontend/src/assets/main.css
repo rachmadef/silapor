@@ -1,23 +1,174 @@
 @import "tailwindcss";
 
+@theme {
+  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
 @layer base {
   body {
-    @apply bg-slate-50 text-slate-800 font-sans antialiased min-h-screen selection:bg-indigo-500 selection:text-white;
+    background-color: #FAF8F5;
+    color: #1C1917;
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  ::selection {
+    background-color: #0F766E;
+    color: #FFFFFF;
+  }
+
+  /* Ensure all buttons and interactive controls always use pointer cursor and smooth transitions */
+  button:not(:disabled),
+  [role="button"]:not(:disabled),
+  a,
+  select,
+  summary {
+    cursor: pointer;
+  }
+
+  button:disabled {
+    cursor: not-allowed;
+  }
+
+  button,
+  a {
+    transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  button:not(:disabled):active {
+    transform: scale(0.98);
   }
 }
 
-/* Custom Scrollbar for Light Mode */
+/* Soft Humanist Card & Surface Utilities */
+.surface-card {
+  background-color: #FFFFFF;
+  border: 1px solid rgba(231, 229, 228, 0.85);
+  box-shadow: 0 4px 24px -4px rgba(28, 25, 23, 0.04), 0 1px 3px 0 rgba(28, 25, 23, 0.02);
+}
+
+.surface-card-hover {
+  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+.surface-card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px -8px rgba(28, 25, 23, 0.07), 0 2px 6px 0 rgba(28, 25, 23, 0.03);
+}
+
+/* ==========================================================================
+   Lightweight & Smooth Vue <Transition> Animations (In & Out)
+   ========================================================================== */
+
+/* 1. Page Route Transition (page-fade) */
+.page-fade-enter-active {
+  transition: opacity 0.24s cubic-bezier(0.22, 1, 0.36, 1), transform 0.24s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.page-fade-leave-active {
+  transition: opacity 0.16s cubic-bezier(0.4, 0, 1, 1), transform 0.16s cubic-bezier(0.4, 0, 1, 1);
+}
+.page-fade-enter-from {
+  opacity: 0;
+  transform: translateY(8px);
+}
+.page-fade-leave-to {
+  opacity: 0;
+  transform: translateY(-6px);
+}
+
+/* 2. Modal Backdrop & Dialog Transition (modal) */
+.modal-enter-active {
+  transition: opacity 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.modal-leave-active {
+  transition: opacity 0.18s cubic-bezier(0.4, 0, 1, 1);
+}
+.modal-enter-from,
+.modal-leave-to {
+  opacity: 0;
+}
+
+.modal-enter-active .modal-box {
+  transition: transform 0.26s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.modal-leave-active .modal-box {
+  transition: transform 0.18s cubic-bezier(0.4, 0, 1, 1), opacity 0.18s cubic-bezier(0.4, 0, 1, 1);
+}
+.modal-enter-from .modal-box {
+  opacity: 0;
+  transform: scale(0.95) translateY(10px);
+}
+.modal-leave-to .modal-box {
+  opacity: 0;
+  transform: scale(0.96) translateY(6px);
+}
+
+/* 3. Dropdown / Popover / Alert Transition (fade-slide) */
+.fade-slide-enter-active {
+  transition: opacity 0.2s cubic-bezier(0.22, 1, 0.36, 1), transform 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.fade-slide-leave-active {
+  transition: opacity 0.15s cubic-bezier(0.4, 0, 1, 1), transform 0.15s cubic-bezier(0.4, 0, 1, 1);
+}
+.fade-slide-enter-from,
+.fade-slide-leave-to {
+  opacity: 0;
+  transform: translateY(-6px) scale(0.98);
+}
+
+/* 4. Mobile Sidebar Drawer Transition (drawer-slide) */
+.drawer-backdrop-enter-active,
+.drawer-backdrop-leave-active {
+  transition: opacity 0.22s ease;
+}
+.drawer-backdrop-enter-from,
+.drawer-backdrop-leave-to {
+  opacity: 0;
+}
+
+.drawer-slide-enter-active {
+  transition: transform 0.26s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.drawer-slide-leave-active {
+  transition: transform 0.2s cubic-bezier(0.4, 0, 1, 1);
+}
+.drawer-slide-enter-from,
+.drawer-slide-leave-to {
+  transform: translateX(-100%);
+}
+
+/* 5. List Item / Table Row TransitionGroup (list-item) */
+.list-item-enter-active {
+  transition: opacity 0.24s cubic-bezier(0.22, 1, 0.36, 1), transform 0.24s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.list-item-leave-active {
+  transition: opacity 0.16s cubic-bezier(0.4, 0, 1, 1), transform 0.16s cubic-bezier(0.4, 0, 1, 1);
+}
+.list-item-enter-from {
+  opacity: 0;
+  transform: translateY(6px);
+}
+.list-item-leave-to {
+  opacity: 0;
+  transform: translateY(-4px);
+}
+
+/* Warm Minimalist Scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
 }
 ::-webkit-scrollbar-track {
-  background: #f1f5f9;
+  background: #F5F2EB;
 }
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 4px;
+  background: #D6D3CD;
+  border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: #A8A29E;
 }

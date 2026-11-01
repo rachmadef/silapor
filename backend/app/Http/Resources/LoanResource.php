@@ -21,11 +21,13 @@ class LoanResource extends JsonResource
                 'parent_name' => $this->student->parent?->name,
                 'parent_whatsapp' => $this->student->parent?->whatsapp_number,
             ]),
-            'laptop' => $this->whenLoaded('laptop', fn () => [
+            'laptop' => $this->whenLoaded('laptop', fn () => $this->laptop ? [
                 'id' => $this->laptop->id,
                 'asset_code' => $this->laptop->asset_code,
+                'brand' => $this->laptop->brand,
+                'model' => $this->laptop->model,
                 'serial_number' => $this->laptop->serial_number,
-            ]),
+            ] : null),
             'officer' => $this->whenLoaded('officer', fn () => [
                 'id' => $this->officer->id,
                 'name' => $this->officer->name,

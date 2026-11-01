@@ -1,23 +1,30 @@
 <template>
-  <div class="space-y-6">
+  <div class="space-y-5 sm:space-y-6">
     <!-- Header Banner -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white border border-stone-200/90 rounded-2xl sm:rounded-3xl p-5 sm:p-7 shadow-2xs surface-card-hover">
       <div>
-        <h2 class="text-xl font-bold text-slate-900">Master Data Siswa & QR Code</h2>
-        <p class="text-xs text-slate-500 mt-1">Kelola data siswa, relasi wali murid, cetak & download QR Code unik siswa</p>
+        <span class="text-[11px] font-bold uppercase tracking-wider text-teal-700">Direktori Siswa</span>
+        <h2 class="text-xl sm:text-2xl font-extrabold text-stone-900 tracking-tight mt-0.5">Data Peserta Didik & Kartu QR</h2>
+        <p class="text-xs sm:text-sm text-stone-500 mt-1">Kelola identitas siswa, relasi wali murid, serta cetak kartu QR Code peminjaman</p>
       </div>
 
-      <div class="flex items-center space-x-3">
-        <input
-          v-model="search"
-          type="text"
-          placeholder="Cari NIS / Nama Siswa..."
-          @input="fetchStudents"
-          class="bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-slate-900 text-xs focus:outline-none focus:border-indigo-600 focus:bg-white focus:ring-2 focus:ring-indigo-100 transition-all font-medium"
-        />
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+        <div class="relative flex-1 sm:w-60">
+          <input
+            v-model="search"
+            type="text"
+            placeholder="Cari NIS atau nama..."
+            @input="fetchStudents"
+            class="w-full bg-[#FAF8F5] border border-stone-200 rounded-xl sm:rounded-2xl pl-9 pr-3.5 py-2.5 text-stone-900 text-xs focus:outline-none focus:border-teal-700 focus:bg-white transition-all font-medium"
+          />
+          <svg class="w-4 h-4 text-stone-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+        </div>
         <button
+          type="button"
           @click="openModal()"
-          class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-md shadow-indigo-600/20 transition-all flex items-center shrink-0"
+          class="cursor-pointer px-4 py-2.5 bg-teal-700 hover:bg-teal-800 text-white text-xs font-bold rounded-xl sm:rounded-2xl shadow-xs transition-all flex items-center justify-center shrink-0"
         >
           <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -27,170 +34,222 @@
       </div>
     </div>
 
-    <!-- Students Table -->
-    <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
-      <div class="overflow-x-auto">
-        <table class="w-full text-left text-sm text-slate-700">
-          <thead class="bg-slate-50 text-xs font-bold text-slate-500 uppercase border-b border-slate-200">
-            <tr>
-              <th class="px-4 py-3">NIS</th>
-              <th class="px-4 py-3">Nama Siswa</th>
-              <th class="px-4 py-3">Kelas</th>
-              <th class="px-4 py-3">Wali Murid</th>
-              <th class="px-4 py-3">QR Token</th>
-              <th class="px-4 py-3 text-right">Aksi</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-slate-100">
-            <tr v-if="students.length === 0">
-              <td colspan="6" class="px-4 py-8 text-center text-slate-400 text-xs font-medium">
-                Tidak ada data siswa ditemukan.
-              </td>
-            </tr>
-            <tr v-for="student in students" :key="student.id" class="hover:bg-slate-50/80 transition-colors">
-              <td class="px-4 py-3 font-mono text-indigo-600 font-semibold text-xs">{{ student.nis }}</td>
-              <td class="px-4 py-3 font-bold text-slate-900">{{ student.name }}</td>
-              <td class="px-4 py-3 text-slate-600">{{ student.class?.name || '-' }}</td>
-              <td class="px-4 py-3 text-xs">
-                <p class="text-slate-800 font-semibold">{{ student.parent?.name || '-' }}</p>
-                <p class="text-slate-500 font-mono">{{ student.parent?.whatsapp_number || '' }}</p>
-              </td>
-              <td class="px-4 py-3 font-mono text-amber-700 font-semibold text-xs">{{ student.qr_code?.token || '-' }}</td>
-              <td class="px-4 py-3 text-right space-x-2">
-                <button
-                  @click="viewQrCode(student)"
-                  class="px-2.5 py-1 bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-xl text-xs font-semibold hover:bg-indigo-100 transition-all shadow-xs"
-                >
-                  Kartu QR
-                </button>
-                <button
-                  @click="openModal(student)"
-                  class="px-2.5 py-1 bg-slate-100 text-slate-700 border border-slate-200 rounded-xl text-xs font-semibold hover:bg-slate-200 transition-all shadow-xs"
-                >
-                  Edit
-                </button>
-                <button
-                  @click="deleteStudent(student.id)"
-                  class="px-2.5 py-1 bg-rose-50 text-rose-700 border border-rose-200 rounded-xl text-xs font-semibold hover:bg-rose-100 transition-all shadow-xs"
-                >
-                  Hapus
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- QR Code Preview & Download Modal -->
-    <div v-if="selectedQrStudent" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div class="bg-white border border-slate-200 rounded-3xl p-6 max-w-md w-full text-center space-y-5 shadow-2xl relative">
-        <button
-          @click="selectedQrStudent = null"
-          class="absolute top-4 right-4 text-slate-400 hover:text-slate-700"
-        >
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
-
-        <h3 class="text-lg font-bold text-slate-900">Kartu Identitas QR Siswa</h3>
-
-        <!-- Printable Card Container -->
-        <div id="printable-qr-card" class="bg-slate-50 border-2 border-indigo-200 p-6 rounded-2xl space-y-4 shadow-sm">
-          <div class="border-b border-slate-200 pb-3">
-            <h4 class="text-sm font-extrabold text-indigo-600 tracking-wider">SILAPOR SCHOOL ID</h4>
-            <p class="text-xs text-slate-500 font-medium">Monitoring Laptop Siswa</p>
-          </div>
-
-          <div class="bg-white p-4 rounded-xl inline-block shadow-md border border-slate-100">
-            <img
-              :src="selectedQrStudent.qr_code?.qr_image_url"
-              alt="QR Code Siswa"
-              class="w-44 h-44 mx-auto"
-            />
-          </div>
-
-          <div>
-            <h3 class="text-base font-bold text-slate-900">{{ selectedQrStudent.name }}</h3>
-            <p class="text-xs text-slate-600 font-mono">NIS: {{ selectedQrStudent.nis }} | Kelas: {{ selectedQrStudent.class?.name || '-' }}</p>
-            <p class="text-xs font-mono text-amber-700 font-bold mt-1">{{ selectedQrStudent.qr_code?.token }}</p>
-          </div>
+    <!-- Students Container -->
+    <div class="bg-white border border-stone-200/90 rounded-2xl sm:rounded-3xl p-5 sm:p-7 shadow-2xs space-y-4">
+      <Transition name="fade-slide" mode="out-in">
+        <div v-if="students.length === 0" key="empty" class="py-10 text-center text-stone-400 text-xs font-medium">
+          Tidak ada data peserta didik yang ditemukan.
         </div>
 
-        <!-- Action Buttons -->
-        <div class="grid grid-cols-3 gap-2 pt-2">
+        <div v-else key="list">
+          <!-- Mobile Card List (< sm) -->
+          <div class="sm:hidden space-y-3">
+            <div
+              v-for="student in students"
+              :key="student.id"
+              class="p-4 rounded-2xl bg-[#FAF8F5] border border-stone-200/80 space-y-3"
+            >
+              <div class="flex items-start justify-between gap-2">
+                <div class="flex items-center space-x-2.5">
+                  <div class="w-9 h-9 rounded-xl bg-teal-50 text-teal-800 border border-teal-200/60 font-bold text-xs flex items-center justify-center shrink-0">
+                    {{ student.name.charAt(0).toUpperCase() }}
+                  </div>
+                  <div>
+                    <p class="font-bold text-stone-900 text-sm">{{ student.name }}</p>
+                    <p class="text-[11px] font-mono text-stone-500">NIS: {{ student.nis }} • {{ student.class?.name || '-' }}</p>
+                  </div>
+                </div>
+                <span class="px-2 py-0.5 rounded-lg bg-amber-50 text-amber-800 border border-amber-200 font-mono text-[10px] font-bold">
+                  {{ student.qr_code?.token || '-' }}
+                </span>
+              </div>
+
+              <div class="pt-2.5 border-t border-stone-200/70 flex items-center justify-between text-xs">
+                <div class="truncate pr-2">
+                  <p class="text-[10px] text-stone-400 uppercase font-bold">Wali Murid</p>
+                  <p class="font-semibold text-stone-700 truncate">{{ student.parent?.name || '-' }}</p>
+                </div>
+                <div class="flex items-center space-x-1.5 shrink-0">
+                  <button type="button" @click="viewQrCode(student)" class="cursor-pointer px-2.5 py-1.5 bg-teal-700 text-white rounded-xl text-xs font-bold">QR</button>
+                  <button type="button" @click="openModal(student)" class="cursor-pointer px-2.5 py-1.5 bg-white text-stone-700 border border-stone-200 rounded-xl text-xs font-semibold">Edit</button>
+                  <button type="button" @click="deleteStudent(student.id)" class="cursor-pointer px-2.5 py-1.5 bg-rose-50 text-rose-700 border border-rose-200 rounded-xl text-xs font-semibold">Hapus</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Desktop & Tablet Table (sm+) -->
+          <div class="hidden sm:block overflow-x-auto">
+            <table class="w-full text-left text-sm text-stone-700">
+              <thead class="bg-[#FAF8F5] text-[11px] font-bold text-stone-500 uppercase tracking-wider border-y border-stone-200/80">
+                <tr>
+                  <th class="px-4 py-3.5">Peserta Didik</th>
+                  <th class="px-4 py-3.5">Kelas</th>
+                  <th class="px-4 py-3.5">Wali Murid</th>
+                  <th class="px-4 py-3.5">Token QR</th>
+                  <th class="px-4 py-3.5 text-right">Aksi</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-stone-100">
+                <tr v-for="student in students" :key="student.id" class="hover:bg-[#FAF8F5]/80 transition-colors">
+                  <td class="px-4 py-3.5">
+                    <div class="flex items-center space-x-3">
+                      <div class="w-9 h-9 rounded-xl bg-teal-50 text-teal-800 border border-teal-200/60 font-bold text-xs flex items-center justify-center shrink-0">
+                        {{ student.name.charAt(0).toUpperCase() }}
+                      </div>
+                      <div>
+                        <p class="font-bold text-stone-900">{{ student.name }}</p>
+                        <p class="text-xs font-mono text-stone-500">NIS: {{ student.nis }}</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="px-4 py-3.5">
+                    <span class="px-2.5 py-1 rounded-xl bg-stone-100 text-stone-700 font-semibold text-xs">
+                      {{ student.class?.name || '-' }}
+                    </span>
+                  </td>
+                  <td class="px-4 py-3.5 text-xs">
+                    <p class="text-stone-800 font-semibold">{{ student.parent?.name || '-' }}</p>
+                    <p class="text-stone-500 font-mono">{{ student.parent?.whatsapp_number || '' }}</p>
+                  </td>
+                  <td class="px-4 py-3.5 font-mono text-amber-800 font-semibold text-xs">{{ student.qr_code?.token || '-' }}</td>
+                  <td class="px-4 py-3.5 text-right space-x-2">
+                    <button
+                      type="button"
+                      @click="viewQrCode(student)"
+                      class="cursor-pointer px-3 py-1.5 bg-teal-50 text-teal-800 border border-teal-200/80 rounded-xl text-xs font-bold hover:bg-teal-100/80 transition-all"
+                    >
+                      Kartu QR
+                    </button>
+                    <button
+                      type="button"
+                      @click="openModal(student)"
+                      class="cursor-pointer px-3 py-1.5 bg-[#FAF8F5] text-stone-700 border border-stone-200 rounded-xl text-xs font-semibold hover:bg-stone-100 transition-all"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      type="button"
+                      @click="deleteStudent(student.id)"
+                      class="cursor-pointer px-3 py-1.5 bg-rose-50 text-rose-700 border border-rose-200 rounded-xl text-xs font-semibold hover:bg-rose-100 transition-all"
+                    >
+                      Hapus
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </Transition>
+    </div>
+
+    <!-- Animated QR Code Preview & Download Modal -->
+    <Transition name="modal">
+      <div v-if="selectedQrStudent" class="fixed inset-0 bg-stone-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4" @click.self="selectedQrStudent = null">
+        <div class="modal-box bg-white border border-stone-200 rounded-3xl p-5 sm:p-7 max-w-md w-full max-h-[90vh] overflow-y-auto text-center space-y-5 shadow-2xl relative">
           <button
-            @click="downloadQrCode(selectedQrStudent)"
-            class="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-md shadow-emerald-600/20 transition-all flex items-center justify-center"
+            type="button"
+            @click="selectedQrStudent = null"
+            class="cursor-pointer absolute top-5 right-5 text-stone-400 hover:text-stone-700"
           >
-            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
-            Download
           </button>
 
-          <button
-            @click="printQrCard"
-            class="px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-md shadow-indigo-600/20 transition-all flex items-center justify-center"
-          >
-            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-            </svg>
-            Cetak Card
-          </button>
+          <h3 class="text-lg font-extrabold text-stone-900">Kartu Identitas QR Siswa</h3>
 
-          <button
-            @click="regenerateQrCode(selectedQrStudent)"
-            class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl border border-slate-200 transition-all flex items-center justify-center shadow-xs"
-          >
-            <svg class="w-4 h-4 mr-1 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-            </svg>
-            Regenerate
-          </button>
+          <div id="printable-qr-card" class="bg-[#FAF8F5] border-2 border-stone-200 p-5 sm:p-6 rounded-3xl space-y-4">
+            <div class="border-b border-stone-200 pb-3">
+              <h4 class="text-sm font-extrabold text-teal-800 tracking-wider">SILAPOR SCHOOL ID</h4>
+              <p class="text-xs text-stone-500 font-medium">Kartu Akses Laptop Peserta Didik</p>
+            </div>
+
+            <div class="bg-white p-4 rounded-2xl inline-block shadow-xs border border-stone-200/80">
+              <img
+                :src="selectedQrStudent.qr_code?.qr_image_url"
+                alt="QR Code Siswa"
+                class="w-40 h-40 sm:w-44 sm:h-44 mx-auto"
+              />
+            </div>
+
+            <div>
+              <h3 class="text-base font-extrabold text-stone-900">{{ selectedQrStudent.name }}</h3>
+              <p class="text-xs text-stone-600 font-mono">NIS: {{ selectedQrStudent.nis }} • Kelas: {{ selectedQrStudent.class?.name || '-' }}</p>
+              <p class="text-xs font-mono text-amber-800 font-bold mt-1">{{ selectedQrStudent.qr_code?.token }}</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-3 gap-2 pt-1">
+            <button
+              type="button"
+              @click="downloadQrCode(selectedQrStudent)"
+              class="cursor-pointer px-3 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold rounded-2xl transition-all flex items-center justify-center"
+            >
+              Unduh PNG
+            </button>
+
+            <button
+              type="button"
+              @click="printQrCard"
+              class="cursor-pointer px-3 py-2.5 bg-teal-700 hover:bg-teal-800 text-white text-xs font-bold rounded-2xl transition-all flex items-center justify-center"
+            >
+              Cetak Kartu
+            </button>
+
+            <button
+              type="button"
+              @click="regenerateQrCode(selectedQrStudent)"
+              class="cursor-pointer px-3 py-2.5 bg-[#FAF8F5] hover:bg-stone-100 text-stone-700 text-xs font-semibold rounded-2xl border border-stone-200 transition-all flex items-center justify-center"
+            >
+              Buat Ulang
+            </button>
+          </div>
         </div>
       </div>
-    </div>
+    </Transition>
 
-    <!-- Add/Edit Student Modal -->
-    <div v-if="showModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div class="bg-white border border-slate-200 rounded-3xl p-6 max-w-md w-full space-y-4 shadow-2xl">
-        <h3 class="text-lg font-bold text-slate-900">{{ editingId ? 'Edit Data Siswa' : 'Tambah Siswa Baru' }}</h3>
+    <!-- Animated Add/Edit Student Modal -->
+    <Transition name="modal">
+      <div v-if="showModal" class="fixed inset-0 bg-stone-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4" @click.self="showModal = false">
+        <div class="modal-box bg-white border border-stone-200 rounded-3xl p-5 sm:p-7 max-w-md w-full max-h-[90vh] overflow-y-auto space-y-5 shadow-2xl">
+          <h3 class="text-lg font-extrabold text-stone-900">{{ editingId ? 'Perbarui Data Siswa' : 'Tambah Siswa Baru' }}</h3>
 
-        <form @submit.prevent="saveStudent" class="space-y-4">
-          <div>
-            <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">NIS Siswa</label>
-            <input v-model="form.nis" type="text" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 text-sm focus:outline-none focus:border-indigo-600 focus:bg-white focus:ring-2 focus:ring-indigo-100 transition-all" />
-          </div>
+          <form @submit.prevent="saveStudent" class="space-y-4">
+            <div>
+              <label class="block text-xs font-bold text-stone-700 mb-1.5">Nomor Induk Siswa (NIS)</label>
+              <input v-model="form.nis" type="text" required class="w-full bg-[#FAF8F5] border border-stone-200 rounded-2xl px-3.5 py-2.5 text-stone-900 text-sm focus:outline-none focus:border-teal-700 focus:bg-white transition-all" />
+            </div>
 
-          <div>
-            <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Nama Lengkap</label>
-            <input v-model="form.name" type="text" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 text-sm focus:outline-none focus:border-indigo-600 focus:bg-white focus:ring-2 focus:ring-indigo-100 transition-all" />
-          </div>
+            <div>
+              <label class="block text-xs font-bold text-stone-700 mb-1.5">Nama Lengkap</label>
+              <input v-model="form.name" type="text" required class="w-full bg-[#FAF8F5] border border-stone-200 rounded-2xl px-3.5 py-2.5 text-stone-900 text-sm focus:outline-none focus:border-teal-700 focus:bg-white transition-all" />
+            </div>
 
-          <div>
-            <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Kelas</label>
-            <select v-model="form.class_id" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-slate-900 text-sm focus:outline-none focus:border-indigo-600 focus:bg-white focus:ring-2 focus:ring-indigo-100 transition-all font-medium">
-              <option v-for="cls in classes" :key="cls.id" :value="cls.id">{{ cls.name }} ({{ cls.grade }})</option>
-            </select>
-          </div>
+            <div>
+              <label class="block text-xs font-bold text-stone-700 mb-1.5">Kelas</label>
+              <select v-model="form.class_id" required class="cursor-pointer w-full bg-[#FAF8F5] border border-stone-200 rounded-2xl px-3 py-2.5 text-stone-900 text-sm focus:outline-none focus:border-teal-700 focus:bg-white transition-all font-medium">
+                <option v-for="cls in classes" :key="cls.id" :value="cls.id">{{ cls.name }} ({{ cls.grade }})</option>
+              </select>
+            </div>
 
-          <div>
-            <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Wali Murid</label>
-            <select v-model="form.parent_id" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-slate-900 text-sm focus:outline-none focus:border-indigo-600 focus:bg-white focus:ring-2 focus:ring-indigo-100 transition-all font-medium">
-              <option :value="null">-- Tanpa Wali Murid --</option>
-              <option v-for="p in parents" :key="p.id" :value="p.id">{{ p.name }} ({{ p.whatsapp_number }})</option>
-            </select>
-          </div>
+            <div>
+              <label class="block text-xs font-bold text-stone-700 mb-1.5">Wali Murid</label>
+              <select v-model="form.parent_id" class="cursor-pointer w-full bg-[#FAF8F5] border border-stone-200 rounded-2xl px-3 py-2.5 text-stone-900 text-sm focus:outline-none focus:border-teal-700 focus:bg-white transition-all font-medium">
+                <option :value="null">-- Belum Ada Wali Murid --</option>
+                <option v-for="p in parents" :key="p.id" :value="p.id">{{ p.name }} ({{ p.whatsapp_number }})</option>
+              </select>
+            </div>
 
-          <div class="flex items-center justify-end space-x-3 pt-4 border-t border-slate-200">
-            <button type="button" @click="showModal = false" class="px-4 py-2 bg-slate-100 text-slate-700 text-xs font-semibold rounded-xl border border-slate-200 hover:bg-slate-200 transition-all">Batal</button>
-            <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-md shadow-indigo-600/20 transition-all">Simpan Data</button>
-          </div>
-        </form>
+            <div class="flex items-center justify-end space-x-2.5 pt-4 border-t border-stone-100">
+              <button type="button" @click="showModal = false" class="cursor-pointer px-4 py-2.5 bg-[#FAF8F5] text-stone-700 text-xs font-semibold rounded-2xl border border-stone-200 hover:bg-stone-100 transition-all">Batal</button>
+              <button type="submit" class="cursor-pointer px-5 py-2.5 bg-teal-700 hover:bg-teal-800 text-white text-xs font-bold rounded-2xl shadow-sm transition-all">Simpan Data</button>
+            </div>
+          </form>
+        </div>
       </div>
-    </div>
+    </Transition>
   </div>
 </template>
 
@@ -291,19 +350,19 @@ const printQrCard = () => {
         <title>Kartu QR ${selectedQrStudent.value?.name}</title>
         <style>
           body { font-family: sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; background: #fff; }
-          .card { border: 2px solid #0891b2; padding: 24px; border-radius: 16px; text-align: center; width: 280px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-          .header { font-size: 16px; font-weight: 800; color: #0891b2; margin-bottom: 4px; }
-          .sub { font-size: 11px; color: #64748b; margin-bottom: 16px; }
+          .card { border: 2px solid #0f766e; padding: 24px; border-radius: 20px; text-align: center; width: 280px; }
+          .header { font-size: 16px; font-weight: 800; color: #0f766e; margin-bottom: 4px; }
+          .sub { font-size: 11px; color: #78716c; margin-bottom: 16px; }
           .qr { width: 180px; height: 180px; margin: 0 auto 16px auto; }
-          .name { font-size: 16px; font-weight: 700; color: #0f172a; margin-bottom: 4px; }
-          .meta { font-size: 12px; color: #475569; font-family: monospace; }
-          .token { font-size: 12px; font-weight: 700; color: #d97706; font-family: monospace; margin-top: 6px; }
+          .name { font-size: 16px; font-weight: 700; color: #1c1917; margin-bottom: 4px; }
+          .meta { font-size: 12px; color: #57534e; font-family: monospace; }
+          .token { font-size: 12px; font-weight: 700; color: #b45309; font-family: monospace; margin-top: 6px; }
         </style>
       </head>
       <body>
         <div class="card">
           <div class="header">SILAPOR SCHOOL ID</div>
-          <div class="sub">Monitoring Laptop Siswa</div>
+          <div class="sub">Kartu Akses Laptop Peserta Didik</div>
           <img src="${selectedQrStudent.value?.qr_code?.qr_image_url}" class="qr" />
           <div class="name">${selectedQrStudent.value?.name}</div>
           <div class="meta">NIS: ${selectedQrStudent.value?.nis} | Kelas: ${selectedQrStudent.value?.class?.name || '-'}</div>

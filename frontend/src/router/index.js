@@ -9,6 +9,12 @@ const routes = [
     meta: { requiresGuest: true },
   },
   {
+    path: '/form-laptop',
+    name: 'student-laptop-form',
+    component: () => import('@/views/laptops/StudentLaptopFormView.vue'),
+    meta: { isPublic: true },
+  },
+  {
     path: '/',
     redirect: '/dashboard',
   },

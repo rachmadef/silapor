@@ -1,133 +1,264 @@
 <template>
-  <aside class="w-64 bg-white border-r border-slate-200 shrink-0 hidden md:block min-h-[calc(100vh-65px)] shadow-xs">
-    <div class="p-4 space-y-6">
-      <!-- Session Actions -->
-      <div>
-        <h3 class="px-3 text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Operasional Scanner</h3>
-        <nav class="space-y-1">
+  <!-- Mobile & Tablet Animated Backdrop (< lg) -->
+  <Transition name="drawer-backdrop">
+    <div
+      v-if="mobileOpen"
+      @click="$emit('close')"
+      class="cursor-pointer fixed inset-0 bg-stone-900/35 backdrop-blur-xs z-40 lg:hidden"
+    ></div>
+  </Transition>
+
+  <!-- Mobile & Tablet Animated Slide-Over Drawer (< lg) -->
+  <Transition name="drawer-slide">
+    <aside
+      v-if="mobileOpen"
+      class="fixed inset-y-0 left-0 z-50 w-72 max-w-[85vw] bg-[#FAF8F5] border-r border-stone-200 shadow-2xl p-4 overflow-y-auto flex flex-col justify-between lg:hidden"
+    >
+      <div class="space-y-5">
+        <div class="flex items-center justify-between pb-3 border-b border-stone-200/80">
+          <div class="flex items-center space-x-2.5">
+            <div class="w-8 h-8 rounded-xl bg-teal-700 flex items-center justify-center text-white font-extrabold text-xs">
+              S
+            </div>
+            <div>
+              <p class="text-sm font-extrabold text-stone-900 leading-none">Menu Navigasi</p>
+              <p class="text-[11px] text-stone-500 mt-0.5">SILAPOR Sekolah</p>
+            </div>
+          </div>
+          <button
+            type="button"
+            @click="$emit('close')"
+            class="cursor-pointer p-1.5 rounded-xl bg-white border border-stone-200 text-stone-500 hover:text-stone-800"
+            aria-label="Tutup Menu"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <!-- Quick Scanner Section -->
+        <div class="bg-white border border-stone-200/80 rounded-2xl p-2.5 shadow-2xs space-y-1">
+          <p class="px-2.5 pt-1 pb-0.5 text-[10px] font-bold text-stone-400 uppercase tracking-wider">Aktivitas Harian</p>
           <RouterLink
             to="/pickup"
-            class="flex items-center px-3 py-2.5 rounded-xl text-sm font-medium transition-all"
-            :class="isActive('/pickup') ? 'bg-indigo-50 text-indigo-700 border border-indigo-200/80 font-semibold shadow-xs' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'"
+            class="cursor-pointer flex items-center px-3 py-2.5 rounded-xl text-xs font-bold transition-all"
+            :class="isActive('/pickup')
+              ? 'bg-teal-700 text-white shadow-xs'
+              : 'text-stone-700 hover:bg-stone-100/80'"
           >
-            <svg class="w-5 h-5 mr-3 text-indigo-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-            </svg>
-            Scan Pengambilan (Pagi)
+            <span
+              class="w-7 h-7 rounded-lg flex items-center justify-center mr-2.5 shrink-0"
+              :class="isActive('/pickup') ? 'bg-white/20 text-white' : 'bg-teal-50 text-teal-700'"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M12 4v16m8-8H4" />
+              </svg>
+            </span>
+            <div class="min-w-0">
+              <p class="leading-tight truncate">Scan Ambil Laptop</p>
+              <p class="text-[10px] font-normal opacity-75">Sesi Pagi • 07.30–09.00</p>
+            </div>
           </RouterLink>
 
           <RouterLink
             to="/return"
-            class="flex items-center px-3 py-2.5 rounded-xl text-sm font-medium transition-all"
-            :class="isActive('/return') ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/80 font-semibold shadow-xs' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'"
+            class="cursor-pointer flex items-center px-3 py-2.5 rounded-xl text-xs font-bold transition-all"
+            :class="isActive('/return')
+              ? 'bg-emerald-700 text-white shadow-xs'
+              : 'text-stone-700 hover:bg-stone-100/80'"
           >
-            <svg class="w-5 h-5 mr-3 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-            </svg>
-            Scan Pengembalian (Siang)
+            <span
+              class="w-7 h-7 rounded-lg flex items-center justify-center mr-2.5 shrink-0"
+              :class="isActive('/return') ? 'bg-white/20 text-white' : 'bg-emerald-50 text-emerald-700'"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M5 13l4 4L19 7" />
+              </svg>
+            </span>
+            <div class="min-w-0">
+              <p class="leading-tight truncate">Scan Kembalikan</p>
+              <p class="text-[10px] font-normal opacity-75">Sesi Siang • 13.00–15.00</p>
+            </div>
           </RouterLink>
-        </nav>
+        </div>
+
+        <!-- Pemantauan & Laporan -->
+        <div>
+          <h3 class="px-3 text-[10px] font-bold text-stone-400 uppercase tracking-wider mb-1.5">Pemantauan</h3>
+          <nav class="space-y-1">
+            <RouterLink
+              v-for="item in monitoringLinks"
+              :key="item.to"
+              :to="item.to"
+              class="cursor-pointer flex items-center px-3 py-2 rounded-xl text-xs font-semibold transition-all"
+              :class="isActive(item.to)
+                ? 'bg-white text-teal-800 border border-stone-200/90 shadow-2xs font-bold'
+                : 'text-stone-600 hover:bg-stone-200/50 hover:text-stone-900'"
+            >
+              <span
+                class="w-1.5 h-1.5 rounded-full mr-2.5 shrink-0 transition-all"
+                :class="isActive(item.to) ? 'bg-teal-600 scale-125' : 'bg-stone-300'"
+              ></span>
+              <span class="truncate">{{ item.label }}</span>
+            </RouterLink>
+          </nav>
+        </div>
+
+        <!-- Data Referensi Sekolah -->
+        <div>
+          <h3 class="px-3 text-[10px] font-bold text-stone-400 uppercase tracking-wider mb-1.5">Data Sekolah</h3>
+          <nav class="space-y-1">
+            <RouterLink
+              v-for="item in masterLinks"
+              :key="item.to"
+              :to="item.to"
+              class="cursor-pointer flex items-center px-3 py-2 rounded-xl text-xs font-semibold transition-all"
+              :class="isActive(item.to)
+                ? 'bg-white text-teal-800 border border-stone-200/90 shadow-2xs font-bold'
+                : 'text-stone-600 hover:bg-stone-200/50 hover:text-stone-900'"
+            >
+              <span
+                class="w-1.5 h-1.5 rounded-full mr-2.5 shrink-0 transition-all"
+                :class="isActive(item.to) ? 'bg-amber-600 scale-125' : 'bg-stone-300'"
+              ></span>
+              <span class="truncate">{{ item.label }}</span>
+            </RouterLink>
+          </nav>
+        </div>
       </div>
 
-      <!-- Main Navigation -->
+      <div class="mt-6 mb-2 bg-gradient-to-br from-amber-50/90 via-orange-50/60 to-stone-50 border border-amber-200/70 rounded-2xl p-3.5 space-y-2 shrink-0">
+        <div class="flex items-center space-x-2">
+          <span class="w-6 h-6 rounded-lg bg-amber-500/15 text-amber-800 flex items-center justify-center font-bold text-xs">
+            ✦
+          </span>
+          <p class="text-xs font-bold text-stone-900">Form Mandiri Siswa</p>
+        </div>
+        <p class="text-[11px] text-stone-600 leading-relaxed">
+          Tautan pengisian merk & tipe laptop peserta didik.
+        </p>
+        <RouterLink
+          to="/form-laptop"
+          class="cursor-pointer w-full py-2 px-3 rounded-xl bg-white hover:bg-amber-50 text-amber-900 border border-amber-200/90 text-xs font-bold flex items-center justify-center transition-all shadow-2xs"
+        >
+          Buka Form Siswa →
+        </RouterLink>
+      </div>
+    </aside>
+  </Transition>
+
+  <!-- Desktop Sticky Sidebar (lg+) -->
+  <aside class="hidden lg:flex lg:w-64 shrink-0 flex-col justify-between lg:sticky lg:top-[65px] lg:h-[calc(100vh-65px)] lg:overflow-y-auto border-r border-stone-200/80 p-5">
+    <div class="space-y-5">
+      <!-- Quick Scanner Section -->
+      <div class="bg-white border border-stone-200/80 rounded-2xl p-2.5 shadow-2xs space-y-1">
+        <p class="px-2.5 pt-1 pb-0.5 text-[10px] font-bold text-stone-400 uppercase tracking-wider">Aktivitas Harian</p>
+        <RouterLink
+          to="/pickup"
+          class="cursor-pointer flex items-center px-3 py-2.5 rounded-xl text-xs font-bold transition-all"
+          :class="isActive('/pickup')
+            ? 'bg-teal-700 text-white shadow-xs'
+            : 'text-stone-700 hover:bg-stone-100/80'"
+        >
+          <span
+            class="w-7 h-7 rounded-lg flex items-center justify-center mr-2.5 shrink-0"
+            :class="isActive('/pickup') ? 'bg-white/20 text-white' : 'bg-teal-50 text-teal-700'"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M12 4v16m8-8H4" />
+            </svg>
+          </span>
+          <div class="min-w-0">
+            <p class="leading-tight truncate">Scan Ambil Laptop</p>
+            <p class="text-[10px] font-normal opacity-75">Sesi Pagi • 07.30–09.00</p>
+          </div>
+        </RouterLink>
+
+        <RouterLink
+          to="/return"
+          class="cursor-pointer flex items-center px-3 py-2.5 rounded-xl text-xs font-bold transition-all"
+          :class="isActive('/return')
+            ? 'bg-emerald-700 text-white shadow-xs'
+            : 'text-stone-700 hover:bg-stone-100/80'"
+        >
+          <span
+            class="w-7 h-7 rounded-lg flex items-center justify-center mr-2.5 shrink-0"
+            :class="isActive('/return') ? 'bg-white/20 text-white' : 'bg-emerald-50 text-emerald-700'"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M5 13l4 4L19 7" />
+            </svg>
+          </span>
+          <div class="min-w-0">
+            <p class="leading-tight truncate">Scan Kembalikan</p>
+            <p class="text-[10px] font-normal opacity-75">Sesi Siang • 13.00–15.00</p>
+          </div>
+        </RouterLink>
+      </div>
+
+      <!-- Pemantauan & Laporan -->
       <div>
-        <h3 class="px-3 text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Monitoring</h3>
+        <h3 class="px-3 text-[10px] font-bold text-stone-400 uppercase tracking-wider mb-1.5">Pemantauan</h3>
         <nav class="space-y-1">
           <RouterLink
-            to="/dashboard"
-            class="flex items-center px-3 py-2.5 rounded-xl text-sm font-medium transition-all"
-            :class="isActive('/dashboard') ? 'bg-indigo-50 text-indigo-700 border border-indigo-200/80 font-semibold shadow-xs' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'"
+            v-for="item in monitoringLinks"
+            :key="item.to"
+            :to="item.to"
+            class="cursor-pointer flex items-center px-3 py-2 rounded-xl text-xs font-semibold transition-all"
+            :class="isActive(item.to)
+              ? 'bg-white text-teal-800 border border-stone-200/90 shadow-2xs font-bold'
+              : 'text-stone-600 hover:bg-stone-200/50 hover:text-stone-900'"
           >
-            <svg class="w-5 h-5 mr-3 text-indigo-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-            </svg>
-            Dashboard Utama
-          </RouterLink>
-
-          <RouterLink
-            to="/monitoring"
-            class="flex items-center px-3 py-2.5 rounded-xl text-sm font-medium transition-all"
-            :class="isActive('/monitoring') ? 'bg-indigo-50 text-indigo-700 border border-indigo-200/80 font-semibold shadow-xs' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'"
-          >
-            <svg class="w-5 h-5 mr-3 text-indigo-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-            </svg>
-            Monitoring Real-time
-          </RouterLink>
-
-          <RouterLink
-            to="/notifications"
-            class="flex items-center px-3 py-2.5 rounded-xl text-sm font-medium transition-all"
-            :class="isActive('/notifications') ? 'bg-amber-50 text-amber-700 border border-amber-200/80 font-semibold shadow-xs' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'"
-          >
-            <svg class="w-5 h-5 mr-3 text-amber-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-            </svg>
-            Log WhatsApp WA
+            <span
+              class="w-1.5 h-1.5 rounded-full mr-2.5 shrink-0 transition-all"
+              :class="isActive(item.to) ? 'bg-teal-600 scale-125' : 'bg-stone-300'"
+            ></span>
+            <span class="truncate">{{ item.label }}</span>
           </RouterLink>
         </nav>
       </div>
 
-      <!-- Master Data -->
+      <!-- Data Referensi Sekolah -->
       <div>
-        <h3 class="px-3 text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Master Data</h3>
+        <h3 class="px-3 text-[10px] font-bold text-stone-400 uppercase tracking-wider mb-1.5">Data Sekolah</h3>
         <nav class="space-y-1">
           <RouterLink
-            to="/students"
-            class="flex items-center px-3 py-2 rounded-xl text-sm font-medium transition-all"
-            :class="isActive('/students') ? 'bg-indigo-50 text-indigo-700 border border-indigo-200/80 font-semibold shadow-xs' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'"
+            v-for="item in masterLinks"
+            :key="item.to"
+            :to="item.to"
+            class="cursor-pointer flex items-center px-3 py-2 rounded-xl text-xs font-semibold transition-all"
+            :class="isActive(item.to)
+              ? 'bg-white text-teal-800 border border-stone-200/90 shadow-2xs font-bold'
+              : 'text-stone-600 hover:bg-stone-200/50 hover:text-stone-900'"
           >
-            <svg class="w-4 h-4 mr-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-            </svg>
-            Data Siswa & QR
-          </RouterLink>
-
-          <RouterLink
-            to="/classes"
-            class="flex items-center px-3 py-2 rounded-xl text-sm font-medium transition-all"
-            :class="isActive('/classes') ? 'bg-indigo-50 text-indigo-700 border border-indigo-200/80 font-semibold shadow-xs' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'"
-          >
-            <svg class="w-4 h-4 mr-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-            </svg>
-            Data Kelas
-          </RouterLink>
-
-          <RouterLink
-            to="/parents"
-            class="flex items-center px-3 py-2 rounded-xl text-sm font-medium transition-all"
-            :class="isActive('/parents') ? 'bg-indigo-50 text-indigo-700 border border-indigo-200/80 font-semibold shadow-xs' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'"
-          >
-            <svg class="w-4 h-4 mr-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-            </svg>
-            Data Wali Murid
-          </RouterLink>
-
-          <RouterLink
-            to="/laptops"
-            class="flex items-center px-3 py-2 rounded-xl text-sm font-medium transition-all"
-            :class="isActive('/laptops') ? 'bg-indigo-50 text-indigo-700 border border-indigo-200/80 font-semibold shadow-xs' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'"
-          >
-            <svg class="w-4 h-4 mr-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-            </svg>
-            Aset Laptop
-          </RouterLink>
-
-          <RouterLink
-            to="/schedules"
-            class="flex items-center px-3 py-2 rounded-xl text-sm font-medium transition-all"
-            :class="isActive('/schedules') ? 'bg-indigo-50 text-indigo-700 border border-indigo-200/80 font-semibold shadow-xs' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'"
-          >
-            <svg class="w-4 h-4 mr-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
-            Sesi Jadwal
+            <span
+              class="w-1.5 h-1.5 rounded-full mr-2.5 shrink-0 transition-all"
+              :class="isActive(item.to) ? 'bg-amber-600 scale-125' : 'bg-stone-300'"
+            ></span>
+            <span class="truncate">{{ item.label }}</span>
           </RouterLink>
         </nav>
       </div>
+    </div>
+
+    <!-- Bottom Humanist Card: Form Siswa Shortcut -->
+    <div class="mt-6 mb-2 bg-gradient-to-br from-amber-50/90 via-orange-50/60 to-stone-50 border border-amber-200/70 rounded-2xl p-3.5 space-y-2 shrink-0">
+      <div class="flex items-center space-x-2">
+        <span class="w-6 h-6 rounded-lg bg-amber-500/15 text-amber-800 flex items-center justify-center font-bold text-xs">
+          ✦
+        </span>
+        <p class="text-xs font-bold text-stone-900">Form Mandiri Siswa</p>
+      </div>
+      <p class="text-[11px] text-stone-600 leading-relaxed">
+        Tautan pengisian merk & tipe laptop peserta didik.
+      </p>
+      <RouterLink
+        to="/form-laptop"
+        class="cursor-pointer w-full py-2 px-3 rounded-xl bg-white hover:bg-amber-50 text-amber-900 border border-amber-200/90 text-xs font-bold flex items-center justify-center transition-all shadow-2xs"
+      >
+        Buka Form Siswa →
+      </RouterLink>
     </div>
   </aside>
 </template>
@@ -135,6 +266,29 @@
 <script setup>
 import { useRoute } from 'vue-router'
 
+defineProps({
+  mobileOpen: {
+    type: Boolean,
+    default: false,
+  },
+})
+
+defineEmits(['close'])
+
 const route = useRoute()
 const isActive = (path) => route.path === path
+
+const monitoringLinks = [
+  { to: '/dashboard', label: 'Beranda Ringkasan' },
+  { to: '/monitoring', label: 'Pantauan Real-time' },
+  { to: '/notifications', label: 'Riwayat Pesan WA' },
+]
+
+const masterLinks = [
+  { to: '/students', label: 'Peserta Didik & QR' },
+  { to: '/laptops', label: 'Data Laptop Siswa' },
+  { to: '/classes', label: 'Daftar Kelas' },
+  { to: '/parents', label: 'Kontak Wali Murid' },
+  { to: '/schedules', label: 'Jadwal Sesi' },
+]
 </script>

@@ -1,62 +1,63 @@
 <template>
   <div class="space-y-6">
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white border border-stone-200/90 rounded-3xl p-6 sm:p-7 shadow-2xs">
       <div>
-        <h2 class="text-xl font-bold text-slate-900">Log Notifikasi WhatsApp Wali Murid</h2>
-        <p class="text-xs text-slate-500 mt-1">Riwayat pengiriman pesan peringatan keterlambatan pengembalian laptop</p>
+        <span class="text-[11px] font-bold uppercase tracking-wider text-amber-700">Komunikasi Wali Murid</span>
+        <h2 class="text-xl sm:text-2xl font-extrabold text-stone-900 tracking-tight mt-0.5">Riwayat Notifikasi WhatsApp</h2>
+        <p class="text-xs sm:text-sm text-stone-500 mt-1">Catatan pengiriman pesan pengingat kepada wali murid bagi siswa yang belum mengembalikan laptop</p>
       </div>
 
-      <div class="flex items-center space-x-3">
-        <select v-model="filterStatus" @change="fetchNotifications" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900 text-xs focus:outline-none focus:border-indigo-600 focus:bg-white focus:ring-2 focus:ring-indigo-100 transition-all font-medium">
+      <div class="flex items-center space-x-2.5">
+        <select v-model="filterStatus" @change="fetchNotifications" class="bg-[#FAF8F5] border border-stone-200 rounded-2xl px-3.5 py-2.5 text-stone-900 text-xs focus:outline-none focus:border-teal-700 focus:bg-white transition-all font-semibold cursor-pointer">
           <option value="">Semua Status</option>
-          <option value="SENT">Terkirim (SENT)</option>
-          <option value="FAILED">Gagal (FAILED)</option>
-          <option value="PENDING">Menunggu (PENDING)</option>
+          <option value="SENT">Terkirim</option>
+          <option value="FAILED">Gagal Kirim</option>
+          <option value="PENDING">Menunggu</option>
         </select>
-        <button @click="fetchNotifications" class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl border border-slate-200 transition-all shadow-xs">Refresh</button>
+        <button @click="fetchNotifications" class="px-4 py-2.5 bg-[#FAF8F5] hover:bg-stone-100 text-stone-700 text-xs font-semibold rounded-2xl border border-stone-200 transition-all cursor-pointer">Segarkan</button>
       </div>
     </div>
 
     <!-- Table -->
-    <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
+    <div class="bg-white border border-stone-200/90 rounded-3xl p-6 sm:p-7 shadow-2xs space-y-4">
       <div class="overflow-x-auto">
-        <table class="w-full text-left text-sm text-slate-700">
-          <thead class="bg-slate-50 text-xs font-bold text-slate-500 uppercase border-b border-slate-200">
+        <table class="w-full text-left text-sm text-stone-700">
+          <thead class="bg-[#FAF8F5] text-[11px] font-bold text-stone-500 uppercase tracking-wider border-y border-stone-200/80">
             <tr>
-              <th class="px-4 py-3">Waktu Kirim</th>
-              <th class="px-4 py-3">Nama Siswa</th>
-              <th class="px-4 py-3">Kelas</th>
-              <th class="px-4 py-3">Wali Murid & No. WA</th>
-              <th class="px-4 py-3">Status WA</th>
-              <th class="px-4 py-3">Pesan / Error</th>
-              <th class="px-4 py-3 text-right">Aksi</th>
+              <th class="px-4 py-3.5">Waktu Kirim</th>
+              <th class="px-4 py-3.5">Peserta Didik</th>
+              <th class="px-4 py-3.5">Kelas</th>
+              <th class="px-4 py-3.5">Wali Murid & WhatsApp</th>
+              <th class="px-4 py-3.5">Status</th>
+              <th class="px-4 py-3.5">Keterangan</th>
+              <th class="px-4 py-3.5 text-right">Aksi</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-slate-100">
+          <tbody class="divide-y divide-stone-100">
             <tr v-if="notifications.length === 0">
-              <td colspan="7" class="px-4 py-8 text-center text-slate-400 text-xs font-medium">
-                Belum ada log notifikasi WhatsApp.
+              <td colspan="7" class="px-4 py-10 text-center text-stone-400 text-xs font-medium">
+                Belum ada riwayat pengiriman pesan WhatsApp.
               </td>
             </tr>
-            <tr v-for="notif in notifications" :key="notif.id" class="hover:bg-slate-50/80 transition-colors">
-              <td class="px-4 py-3 text-xs text-slate-500 font-mono font-medium">{{ formatDate(notif.sent_at || notif.created_at) }}</td>
-              <td class="px-4 py-3 font-bold text-slate-900">{{ notif.student?.name }}</td>
-              <td class="px-4 py-3 text-slate-600">{{ notif.student?.classRoom?.name || '-' }}</td>
-              <td class="px-4 py-3 text-xs">
-                <p class="text-slate-800 font-semibold">{{ notif.parent?.name }}</p>
-                <p class="text-indigo-600 font-mono font-semibold">{{ notif.parent?.whatsapp_number }}</p>
+            <tr v-for="notif in notifications" :key="notif.id" class="hover:bg-[#FAF8F5]/80 transition-colors">
+              <td class="px-4 py-3.5 text-xs text-stone-500 font-mono font-medium">{{ formatDate(notif.sent_at || notif.created_at) }}</td>
+              <td class="px-4 py-3.5 font-bold text-stone-900">{{ notif.student?.name }}</td>
+              <td class="px-4 py-3.5 text-stone-600 text-xs font-semibold">{{ notif.student?.classRoom?.name || '-' }}</td>
+              <td class="px-4 py-3.5 text-xs">
+                <p class="text-stone-800 font-semibold">{{ notif.parent?.name }}</p>
+                <p class="text-teal-700 font-mono font-semibold">{{ notif.parent?.whatsapp_number }}</p>
               </td>
-              <td class="px-4 py-3">
+              <td class="px-4 py-3.5">
                 <StatusBadge :status="notif.status" />
               </td>
-              <td class="px-4 py-3 text-xs text-slate-500 font-medium max-w-xs truncate">
-                {{ notif.error_message || 'Pesan peringatan keterlambatan pengembalian laptop' }}
+              <td class="px-4 py-3.5 text-xs text-stone-500 font-medium max-w-xs truncate">
+                {{ notif.error_message || 'Pengingat pengembalian laptop siswa' }}
               </td>
-              <td class="px-4 py-3 text-right">
+              <td class="px-4 py-3.5 text-right">
                 <button
                   v-if="notif.status === 'FAILED'"
                   @click="retryNotification(notif.id)"
-                  class="px-2.5 py-1 bg-amber-50 text-amber-700 border border-amber-200 rounded-xl text-xs font-semibold hover:bg-amber-100 transition-all shadow-xs"
+                  class="px-3 py-1.5 bg-amber-50 text-amber-800 border border-amber-200 rounded-xl text-xs font-bold hover:bg-amber-100 transition-all cursor-pointer"
                 >
                   Kirim Ulang
                 </button>

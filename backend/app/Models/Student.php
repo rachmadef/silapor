@@ -47,6 +47,11 @@ class Student extends Model
         return $this->hasMany(LaptopLoan::class, 'student_id');
     }
 
+    public function laptop(): HasOne
+    {
+        return $this->hasOne(Laptop::class, 'student_id');
+    }
+
     public function activeLoan(): HasOne
     {
         return $this->hasOne(LaptopLoan::class, 'student_id')->where('status', 'BORROWED')->latestOfMany();
